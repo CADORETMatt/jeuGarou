@@ -41,6 +41,18 @@
             overflow: hidden;
         }
 
+        #buzz-next {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle at top, #44ff88, #117733);
+            box-shadow: 0 0 25px rgba(0, 255, 128, 0.6);
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+
         #sidebar {
             position: fixed;
             left: 0;
@@ -169,7 +181,10 @@
         }
 
         #buzz-zone {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
             padding: 10px;
         }
 
@@ -241,6 +256,7 @@
         <button id="btn-salle1" class="active">Salle 1 (Toi)</button>
         <button id="btn-salle2">Salle 2 (Robert)</button>
         <button id="btn-salle3">Salle 3 (Michel)</button>
+        <div id="player-presentation"></div>
         <div id="player-params">
             <h3>Paramètres du Joueur</h3>
             <label>Nom: <input type="text" id="param-name"></label>
@@ -260,19 +276,39 @@
 
     <div id="main">
         <h1>Tralala - Jeu Garou Mortel</h1>
+        <div id="game-banner">
+            <span id="game-status">🕯️ Le jeu est en cours</span>
+
+            <button id="toggle-player">Vue : J1</button>
+            <button id="toggle-mj">Mode : Joueur</button>
+
+            <div id="mj-panel" style="display:none;">
+                <h3>🎭 Mode Maître du Jeu</h3>
+                <textarea id="adn-editor" rows="8"></textarea>
+                <button id="apply-adn">Appliquer ADN</button>
+            </div>
+        </div>
+
+        <div id="room-info"></div>
+        <!--A FAIRE : Mettre titre à gauche et Bouton MJ/Joueur à droite dans même div-->
+
         <div id="display"></div>
         <div id="buzz-zone">
             <button id="buzz">BUZZ</button>
             <p id="buzz-info">Le buzz est inactif.</p>
+            <button id="buzz-next">NEXT</button>
         </div>
         <div id="input-zone">
             <input type="text" id="message-input" placeholder="Écris ton message...">
             <button id="send-btn">Envoyer</button>
         </div>
+        <div>
+        </div>
     </div>
 
     <footer>
         Jeu de rôle expérimental par MattMarket Digitals.
+        <button id="abandon-btn">Abandonner la partie</button>
     </footer>
 
     <script>
@@ -284,11 +320,11 @@
             adn: {
                 Lieu: "Émission TV « Tralala »",
                 Buzz: "inactif",
-                SallePublic: "actif",
-                Salle1: { scene: "Plateau", nom: "Toi", role: "Justicier", perso: "Animateur", vivant: true, type: "Humain" },
+                SallePublic: "Pupitre TV",
+                Salle1: { scene: "Epreuve", nom: "Toi", role: "Justicier", perso: "Animateur", vivant: true, type: "Humain" },
                 Salle2: { scene: "Loge", nom: "Robert", role: "Acolyte", perso: "Candidat", vivant: true, type: "Gpt" },
                 Salle3: { scene: "Coulisses", nom: "Michel", role: "Meurtrier", perso: "Producteur", vivant: true, type: "Gpt" },
-                DerniereScene: "Début",
+                currentSalle: "SallePublic",
                 buzzActive: false
             },
             history: [] // {sender: 'salleKey', message: 'texte', target: 'salleKey'}
@@ -308,9 +344,66 @@
         const paramVivant = document.getElementById('param-vivant');
         const saveParams = document.getElementById('save-params');
 
+        const salleOrder = ['SallePublic', 'Salle1', 'Salle2', 'Salle3'];
+        let mode = 'joueur'; // ou 'mj'
         let currentSalle = 'Salle1'; // Par défaut, salle du joueur
+        ///////View des joueur////////////////
+        let viewedPlayer = 'Salle1'; // J1 par défaut
+        const playerKeys = ['Salle1', 'Salle2', 'Salle3'];
+        const togglePlayerBtn = document.getElementById('toggle-player');
+        togglePlayerBtn.addEventListener('click', () => {
+            const index = playerKeys.indexOf(viewedPlayer);
+            viewedPlayer = playerKeys[(index + 1) % playerKeys.length];
+            togglePlayerBtn.textContent = `Vue : J${index + 2 > 3 ? 1 : index + 2}`;
+            updateSidebar();
+        });
+        //////////// Btn MJ  ////////////////////////
+        const toggleMJBtn = document.getElementById('toggle-mj');
+        const mjPanel = document.getElementById('mj-panel');
+        const adnEditor = document.getElementById('adn-editor');
+        toggleMJBtn.addEventListener('click', () => {
+            if (mode === 'joueur') {
+                mode = 'mj';
+                toggleMJBtn.textContent = "Mode: MJ";
+                mjPanel.style.display = 'block';
+                adnEditor.value = JSON.stringify(partie.adn, null, 2);
+            } else {
+                mode = 'joueur';
+                toggleMJBtn.textContent = "Mode: Joueur";
+                mjPanel.style.display = 'none';
+            }
 
-        // Fonction pour afficher les messages
+            applyPermissions();
+        });
+        //////////////  Inject ADN /////////////////
+        document.getElementById('apply-adn').addEventListener('click', () => {
+            try {
+                const newAdn = JSON.parse(adnEditor.value);
+                partie.adn = newAdn;
+                partie.history.push({
+                    sender: 'System',
+                    message: '🔄 L’ADN du scénario a été modifié par le MJ.',
+                    target: null
+                });
+                updateSalleUI();
+                showMessages();
+            } catch (e) {
+                alert("ADN invalide (JSON incorrect)");
+            }
+        });
+        ////////////Next Salle /////////////////
+        const buzzNext = document.getElementById('buzz-next');
+
+        buzzNext.addEventListener('click', (e) => {
+            if (e.shiftKey) {
+                //toggleSalle();
+            } else {
+                nextSalle(); updateSidebar();
+            }
+        });
+
+
+        /////////////////////////////        // Fonction pour afficher les messages
         function showMessages() {
             display.innerHTML = '';
             partie.history.forEach(msg => {
@@ -396,26 +489,23 @@ Réagis à la dernière interaction dans la scène avec Toi.
                 btn.classList.add('active');
                 const raw = btn.id.replace('btn-', '');
                 currentSalle = raw.charAt(0).toUpperCase() + raw.slice(1);
-                partie.adn.DerniereScene = `${currentSalle} (${partie.adn[currentSalle].scene})`;
+                partie.adn.currentSalle = `${currentSalle} (${partie.adn[currentSalle].scene})`;
                 showMessages();
                 loadPlayerParams();
             });
         });
 
         // Charger les params du joueur
-        function loadPlayerParams() {
-            const player = partie.adn[currentSalle];
-            if (player) {
-                paramName.value = player.nom;
-                paramRole.value = player.role;
-                paramPerso.value = player.perso;
-                paramType.value = player.type;
-                paramScene.value = player.scene;
-                paramVivant.checked = player.vivant;
-                playerParams.style.display = 'block';
-            } else {
-                playerParams.style.display = 'none';
-            }
+        function loadPlayerParams(playerKey = viewedPlayer) {
+            const player = partie.adn[playerKey];
+            if (!player) return;
+
+            paramName.value = player.nom;
+            paramRole.value = player.role;
+            paramPerso.value = player.perso;
+            paramType.value = player.type;
+            paramScene.value = player.scene;
+            paramVivant.checked = player.vivant;
         }
 
         // Sauvegarder les params
@@ -473,6 +563,110 @@ Réagis à la dernière interaction dans la scène avec Toi.
             buzz.disabled = true;
             showMessages();
         });
+        ////////////////Gestion Salle ///////////////////////////////////
+        function nextSalle() {
+            const index = salleOrder.indexOf(currentSalle);
+            currentSalle = salleOrder[(index + 1) % salleOrder.length];
+            partie.adn.currentSalle = currentSalle;
+            updateSidebar();
+            showMessages();
+        }
+
+        function updateSidebar() {
+            renderPlayerPresentation();
+
+            if (canEditPlayer(viewedPlayer)) {
+                playerParams.style.display = 'block';
+                loadPlayerParams(viewedPlayer);
+            } else {
+                playerParams.style.display = 'none';
+            }
+        }
+
+        ///////////Toujours visible Salle/Perso/////////
+        function renderPlayerPresentation() {
+            const presentation = document.getElementById('player-presentation');
+
+            const players = Object.entries(partie.adn)
+                .filter(([k, v]) => v.nom)
+                .map(([k, v], i) => `
+      <p>
+        <strong>J${i + 1} – ${v.nom}</strong><br>
+        ${v.perso}<br>
+        ${v.vivant ? '🫀 Vivant' : '☠️ Mort'}
+      </p>
+    `)
+                .join('');
+
+            presentation.innerHTML = `<h3>Personnages</h3>${players}`;
+        }
+
+        /////////////////// Autorisations   //////////////////////////////
+        function applyPermissions() {
+            const isMJ = mode === 'mj';
+
+            // Écriture
+            messageInput.disabled = !isMJ && currentSalle !== 'Salle1';
+
+            // Buzz
+            buzz.style.display = isMJ ? 'block' : 'none';
+
+            // Paramètres joueurs
+            playerParams.style.display = isMJ ? 'block' : 'none';
+        }
+        async function abandonnerPartie(nom) {
+            const prompt = `
+Voici l'ADN actuel :
+${JSON.stringify(partie.adn, null, 2)}
+
+Le joueur ${nom} abandonne.
+Redéfinis un nouveau scénario cohérent.
+Renvoie UNIQUEMENT un nouvel ADN JSON.
+`;
+
+            const newAdn = await askGPT(
+                "Tu es un maître du jeu narratif.",
+                prompt
+            );
+
+            partie.adn = JSON.parse(newAdn);
+            partie.history = [];
+            updateSalleUI();
+            showMessages();
+        }
+        function toggleSalle() {
+            // mode = mode === 'joueur' ? 'mj' : 'joueur';
+            //buzzNext.textContent = mode === 'mj' ? 'MJ' : 'Joueur';
+        }
+        //////////////Présentation Joueur///////////////////
+        function canEditPlayer(playerKey) {
+            if (mode === 'mj') return true;
+            return playerKey === 'Salle1'; // joueur local
+        }
+        function updateSidebar() {
+            const presentation = document.getElementById('player-presentation');
+
+            if (mode === 'joueur') {
+                playerParams.style.display = 'none';
+
+                const players = Object.entries(partie.adn)
+                    .filter(([k, v]) => v.nom)
+                    .map(([k, v]) => `
+        <p>
+          <strong>${v.nom}</strong><br>
+          ${v.perso} — ${v.vivant ? '🫀 Vivant' : '☠️ Mort'}
+        </p>
+      `)
+                    .join('');
+
+                presentation.innerHTML = `<h3>Personnages</h3>${players}`;
+                presentation.style.display = 'block';
+            } else {
+                presentation.style.display = 'none';
+                playerParams.style.display = 'block';
+                loadPlayerParams();
+            }
+        }
 
         // Initialisation
         function init() {
@@ -482,7 +676,6 @@ Réagis à la dernière interaction dans la scène avec Toi.
             loadPlayerParams();
             setTimeout(activateBuzz, 5000);
         }
-
         init();
     </script>
 </body>

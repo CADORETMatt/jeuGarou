@@ -1,0 +1,25 @@
+let partie = {
+adn: {
+Lieu: "Émission TV « Tralala »",
+Buzz: "inactif",
+SallePublic: "actif",
+SalleCommune: { scene: "Plateau Commun", description: "Salle principale pour discussions publiques", joueurs: ["Toi",
+"Robert", "Michel"], objectif: "Discuter ouvertement" },
+Salle1: { scene: "Plateau", description: "Ta salle privée", joueurs: ["Toi"], objectif: "Gérer le jeu", nom: "Toi",
+role: "Justicier", perso: "Animateur", vivant: true, type: "Humain" },
+Salle2: { scene: "Loge", description: "Loge du candidat", joueurs: ["Robert"], objectif: "Soutenir le justicier", nom:
+"Robert", role: "Acolyte", perso: "Candidat", vivant: true, type: "Gpt" },
+Salle3: { scene: "Coulisses", description: "Coulisses du producteur", joueurs: ["Michel"], objectif: "Quel est son rôle
+?", nom: "Michel", role: "Meurtrier", perso: "Producteur", vivant: true, type: "Gpt" },
+DerniereScene: "Début",
+buzzActive: false
+},
+history: [] // {sender: 'salleKey', message: 'texte', target: 'salleKey'}
+};
+
+
+chatgpt:
+ Un bouton pour le MJ pour salle suivante, mais l'idée est qu'il faut que le jeu fonctionne sans MJ. Donc il faut que
+sur MJ il y est un bouton Admin prend la main ?... On va mettre sur une banner de <main>Le jeu en cours avec info et les
+    boutons du MJ. Pour l'instant, je ne vois pas la "room-info" ! objectif est stocké dans chaque salle selon
+    l'adn{DerniereScene} ou currentSalle. Il manque les messages de confirmation d'abandon.
