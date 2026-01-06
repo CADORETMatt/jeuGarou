@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu Garou</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            padding-left: 0.2%;
+            padding-right: 0.2%;
+            padding-bottom: 10px;
+            padding-top: 10px;
+        }
+
+        p {
+            margin: 100px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Jeu Garou</h1>
+    <p>Tu veux vivre une expérience de dingue aujourd'hui et on finit en apothéose ce soir après manger ?</p>
+    <p>
+        Le jeu est en préparation, mais tu peux apporter ton soutien
+        en déposant ton email :
+    </p>
+    <button id="idBtnNew" style.display="none">Nouvelle partie ! (inscription)</button>
+    <form id="signup-form">
+        <input type="email" id="email" placeholder="ton@email.fr" required />
+        <button type="submit">Entrer dans la partie</button>
+    </form>
+
+    <p id="message"></p>
+
+    <!-- Supabase JS -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        <!--Affiche form si clic sur bouton-->
+        document.getElementById("idBtnNew").addEventListener("click", function () {
+            document.getElementById("signup-form").style.display = "block";
+        });
+
+        // 1️⃣ Connexion Supabase (clé publique uniquement)
+        const supabaseUrl = "https://TON-PROJET.supabase.co";
+        const supabaseAnonKey = "TA_CLE_ANON_PUBLIQUE";
+
+        const supabase = window.supabase.createClient(
+            supabaseUrl,
+            supabaseAnonKey
+        );
+
+        // 2️⃣ Gestion du formulaire
+        const form = document.getElementById("signup-form");
+        const message = document.getElementById("message");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById("email").value.trim();
+
+            if (!email) {
+                message.textContent = "Email invalide.";
+                return;
+            }
+
+            message.textContent = "Inscription en cours…";
+
+            // 3️⃣ Insertion en base
+            const { error } = await supabase
+                .from("players")
+                .insert([{ email }]);
+
+            if (error) {
+                message.textContent = "Cet email est déjà enregistré ou erreur serveur.";
+                console.error(error);
+                return;
+            }
+
+            message.textContent =
+                "✅ Merci ! Tu recevras des nouvelles tout au long de la journée.";
+        });
+    </script>
+</body>
+
+</html>

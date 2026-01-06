@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tralala - Jeu Garou Mortel</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background-color: #222;
+            --background-secondary: #000;
+            --text-color: #d9bfff;
+            --primary-color: #470684;
+            --accent-color: #FF06B5;
+            --box-shadow-color: #FF06B5;
+            --border-color: #333;
+            --input-bg: #1c1c1c;
+            --button-hover-bg: #555;
+            --sidebar-bg: #1b1b1b;
+            --log-bg: #000;
+            --footer-color: #aaa;
+            --buzz-inactive-opacity: 0.4;
+            --buzz-glow: rgba(255, 0, 0, 0.6);
+            --border-radius: 12px;
+            --padding: 16px;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+            background: radial-gradient(circle at top, var(--background-color) 0%, var(--background-secondary) 60%);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background: var(--sidebar-bg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+            z-index: 10;
+            overflow-y: auto;
+        }
+
+        #sidebar h2 {
+            color: var(--text-color);
+        }
+
+        #sidebar button {
+            padding: 10px;
+            background: var(--primary-color);
+            color: var(--text-color);
+            border: 2px solid var(--accent-color);
+            cursor: pointer;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        #sidebar button:hover {
+            color: var(--accent-color);
+            box-shadow: 0 0 10px var(--box-shadow-color);
+        }
+
+        #sidebar button.active {
+            background: var(--button-hover-bg);
+        }
+
+        #player-params {
+            margin-top: 20px;
+            padding: 10px;
+            background: var(--primary-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            display: none;
+        }
+
+        #player-params label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        #player-params input,
+        #player-params select {
+            width: 100%;
+            padding: 5px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        #player-params button {
+            margin-top: 10px;
+        }
+
+        #main {
+            margin-left: 250px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        #display {
+            flex: 1;
+            background: var(--log-bg);
+            border-radius: 8px;
+            padding: 10px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        #display p {
+            margin-bottom: 10px;
+            display: none;
+            /* Par défaut caché, visible via JS */
+        }
+
+        #display p.visible {
+            display: block;
+        }
+
+        #input-zone {
+            display: flex;
+            padding: 10px;
+            background: #111;
+            border-top: 1px solid var(--border-color);
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 10px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        #send-btn {
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: var(--text-color);
+            border: 2px solid var(--accent-color);
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        #send-btn:hover {
+            color: var(--accent-color);
+            box-shadow: 0 0 10px var(--box-shadow-color);
+        }
+
+        #buzz-zone {
+            text-align: center;
+            padding: 10px;
+        }
+
+        #buzz {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle at top, #ff4444, #990000);
+            box-shadow: 0 0 40px var(--buzz-glow);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: var(--buzz-inactive-opacity);
+            border: none;
+        }
+
+        #buzz.active {
+            opacity: 1;
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 25px rgba(255, 0, 0, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 55px rgba(255, 0, 0, 0.9);
+            }
+
+            100% {
+                box-shadow: 0 0 25px rgba(255, 0, 0, 0.5);
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.75rem;
+            color: var(--footer-color);
+            background: #111;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                flex-direction: row;
+                justify-content: space-around;
+                overflow-y: visible;
+            }
+
+            #main {
+                margin-left: 0;
+                margin-top: 120px;
+            }
+
+            #player-params {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="sidebar">
+        <h2>Tableau de bord</h2>
+        <button id="btn-salle1" class="active">Salle 1 (Toi)</button>
+        <button id="btn-salle2">Salle 2 (Robert)</button>
+        <button id="btn-salle3">Salle 3 (Michel)</button>
+        <div id="player-params">
+            <h3>Paramètres du Joueur</h3>
+            <label>Nom: <input type="text" id="param-name"></label>
+            <label>Role: <input type="text" id="param-role" readonly></label>
+            <label>Personnage: <input type="text" id="param-perso"></label>
+            <label>Type:
+                <select id="param-type">
+                    <option value="Humain">Humain</option>
+                    <option value="Gpt">Gpt</option>
+                </select>
+            </label>
+            <label>Scène: <input type="text" id="param-scene"></label>
+            <label>Vivant: <input type="checkbox" id="param-vivant"></label>
+            <button id="save-params">Sauvegarder</button>
+        </div>
+    </div>
+
+    <div id="main">
+        <h1>Tralala - Jeu Garou Mortel</h1>
+        <div id="display"></div>
+        <div id="buzz-zone">
+            <button id="buzz">BUZZ</button>
+            <p id="buzz-info">Le buzz est inactif.</p>
+        </div>
+        <div id="input-zone">
+            <input type="text" id="message-input" placeholder="Écris ton message...">
+            <button id="send-btn">Envoyer</button>
+        </div>
+    </div>
+
+    <footer>
+        Jeu de rôle expérimental par MattMarket Digitals.
+    </footer>
+
+    <script>
+        // OpenAI API Key
+        const OPENAI_API_KEY = "VOTRE_CLE_API_ICI";
+
+        // Objet Partie contenant ADN et historique
+        let partie = {
+            adn: {
+                Lieu: "Émission TV « Tralala »",
+                Buzz: "inactif",
+                SallePublic: "actif",
+                Salle1: { scene: "Plateau", nom: "Toi", role: "Justicier", perso: "Animateur", vivant: true, type: "Humain" },
+                Salle2: { scene: "Loge", nom: "Robert", role: "Acolyte", perso: "Candidat", vivant: true, type: "Gpt" },
+                Salle3: { scene: "Coulisses", nom: "Michel", role: "Meurtrier", perso: "Producteur", vivant: true, type: "Gpt" },
+                DerniereScene: "Début",
+                buzzActive: false
+            },
+            history: [] // {sender: 'salleKey', message: 'texte', target: 'salleKey'}
+        };
+
+        const display = document.getElementById('display');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const buzz = document.getElementById('buzz');
+        const buzzInfo = document.getElementById('buzz-info');
+        const playerParams = document.getElementById('player-params');
+        const paramName = document.getElementById('param-name');
+        const paramRole = document.getElementById('param-role');
+        const paramPerso = document.getElementById('param-perso');
+        const paramType = document.getElementById('param-type');
+        const paramScene = document.getElementById('param-scene');
+        const paramVivant = document.getElementById('param-vivant');
+        const saveParams = document.getElementById('save-params');
+
+        let currentSalle = 'Salle1'; // Par défaut, salle du joueur
+
+        // Fonction pour afficher les messages
+        function showMessages() {
+            display.innerHTML = '';
+            partie.history.forEach(msg => {
+                const isRelevant = (msg.sender === 'Salle1' && msg.target === currentSalle) ||
+                    (msg.sender === currentSalle && msg.target === 'Salle1') ||
+                    (currentSalle === 'Salle1' && !msg.target); // Publique
+
+                if (isRelevant) {
+                    const p = document.createElement('p');
+                    const senderName =
+                        msg.sender === 'System'
+                            ? '🕯️ Système'
+                            : partie.adn[msg.sender]?.nom ?? msg.sender;
+                    p.textContent = `${senderName}: ${msg.message}`;
+                    p.classList.add('visible'); // Toujours visible si relevant
+                    if (!partie.adn[currentSalle].vivant) {
+                        p.style.display = 'none'; // Invisible si absent
+                    }
+                    display.appendChild(p);
+                }
+            });
+            display.scrollTop = display.scrollHeight;
+        }
+
+        // Appel à l'API OpenAI
+        async function askGPT(systemPrompt, userPrompt) {
+            const res = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-4.1-mini",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: userPrompt }
+                    ],
+                    temperature: 0.9
+                })
+            });
+            const data = await res.json();
+            return data.choices[0].message.content;
+        }
+
+        // Réponse d'un joueur IA
+        async function getIAResponse(salleKey) {
+            const player = partie.adn[salleKey];
+            if (player.type !== 'Gpt' || !player.vivant) return null;
+
+            const systemPrompt = `
+Tu es ${player.nom} (${player.perso}), rôle secret: ${player.role}.
+Tu joues UNIQUEMENT ton personnage.
+Tu n'écris QUE tes dialogues ou actions (1-2 phrases max).
+Si tu es le meurtrier, tu te fais passer pour bienveillant.
+Respecte l'ADN comme carnet de bord.
+`;
+
+            const userPrompt = `
+ADN{
+${JSON.stringify(partie.adn, null, 2)}
+}
+
+Réagis à la dernière interaction dans la scène avec Toi.
+`;
+
+            return await askGPT(systemPrompt, userPrompt);
+        }
+
+        // Activation du buzz
+        function activateBuzz() {
+            partie.adn.Buzz = "actif";
+            partie.adn.buzzActive = true;
+            buzz.classList.add('active');
+            buzzInfo.textContent = "Le buzz est ACTIF. Un choix peut tuer.";
+        }
+
+        // Gestion des boutons du sidebar
+        const buttons = document.querySelectorAll('#sidebar button');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const raw = btn.id.replace('btn-', '');
+                currentSalle = raw.charAt(0).toUpperCase() + raw.slice(1);
+                partie.adn.DerniereScene = `${currentSalle} (${partie.adn[currentSalle].scene})`;
+                showMessages();
+                loadPlayerParams();
+            });
+        });
+
+        // Charger les params du joueur
+        function loadPlayerParams() {
+            const player = partie.adn[currentSalle];
+            if (player) {
+                paramName.value = player.nom;
+                paramRole.value = player.role;
+                paramPerso.value = player.perso;
+                paramType.value = player.type;
+                paramScene.value = player.scene;
+                paramVivant.checked = player.vivant;
+                playerParams.style.display = 'block';
+            } else {
+                playerParams.style.display = 'none';
+            }
+        }
+
+        // Sauvegarder les params
+        saveParams.addEventListener('click', () => {
+            const player = partie.adn[currentSalle];
+            player.nom = paramName.value;
+            player.perso = paramPerso.value;
+            player.type = paramType.value;
+            player.scene = paramScene.value;
+            player.vivant = paramVivant.checked;
+            // Mise à jour des boutons si nom change
+            document.getElementById(`btn-${currentSalle}`).textContent = `${currentSalle} (${player.nom})`;
+            showMessages(); // Refresh pour visibilité
+        });
+
+        // Envoi de message
+        sendBtn.addEventListener('click', async () => {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            const target = currentSalle !== 'Salle1' ? currentSalle : null;
+            partie.history.push({ sender: 'Salle1', message, target });
+            showMessages();
+            messageInput.value = '';
+
+            if (currentSalle !== 'Salle1') {
+                // Conversation privée
+                const response = await getIAResponse(currentSalle);
+                if (response) {
+                    partie.history.push({ sender: currentSalle, message: response, target: 'Salle1' });
+                    showMessages();
+                }
+            } else {
+                // Publique, répondre les autres si GPT et vivants
+                for (let salle of ['Salle2', 'Salle3']) {
+                    const response = await getIAResponse(salle);
+                    if (response) {
+                        partie.history.push({ sender: salle, message: response, target: null });
+                    }
+                }
+                showMessages();
+            }
+        });
+
+        // Gestion du buzz
+        buzz.addEventListener('click', () => {
+            if (!partie.adn.buzzActive) return;
+            const msg = "👉 Tu appuies sur le buzz.";
+            partie.history.push({ sender: 'System', message: msg, target: null });
+            if (partie.adn.Salle3.vivant) {
+                const killMsg = "💥 PAN ! Michel est démasqué comme meurtrier.";
+                partie.history.push({ sender: 'System', message: killMsg, target: null });
+                partie.adn.Salle3.vivant = false;
+            }
+            buzz.disabled = true;
+            showMessages();
+        });
+
+        // Initialisation
+        function init() {
+            const welcome = "🎬 Bienvenue dans Tralala. Tu es l’Animateur (Justicier). Sélectionne une salle ou reste en public.";
+            partie.history.push({ sender: 'System', message: welcome, target: null });
+            showMessages();
+            loadPlayerParams();
+            setTimeout(activateBuzz, 5000);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
