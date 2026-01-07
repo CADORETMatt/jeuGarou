@@ -2,16 +2,13 @@ let partie = {
 adn: {
 Lieu: "Émission TV « Tralala »",
 Buzz: "inactif",
-SallePublic: "actif",
-SalleCommune: { scene: "Plateau Commun", description: "Salle principale pour discussions publiques", joueurs: ["Toi",
-"Robert", "Michel"], objectif: "Discuter ouvertement" },
-Salle1: { scene: "Plateau", description: "Ta salle privée", joueurs: ["Toi"], objectif: "Gérer le jeu", nom: "Toi",
-role: "Justicier", perso: "Animateur", vivant: true, type: "Humain" },
-Salle2: { scene: "Loge", description: "Loge du candidat", joueurs: ["Robert"], objectif: "Soutenir le justicier", nom:
-"Robert", role: "Acolyte", perso: "Candidat", vivant: true, type: "Gpt" },
-Salle3: { scene: "Coulisses", description: "Coulisses du producteur", joueurs: ["Michel"], objectif: "Quel est son rôle
-?", nom: "Michel", role: "Meurtrier", perso: "Producteur", vivant: true, type: "Gpt" },
-DerniereScene: "Début",
+SallePublic: "Pupitre TV",
+J1: { sallePerso: 1, scene: "Epreuve", nom: "Toi", role: "Justicier", perso: "Animateur", vivant: true, type: "Humain"
+},
+J2: { sallePerso: 2, scene: "Loge", nom: "Robert", role: "Acolyte", perso: "Candidat", vivant: true, type: "Gpt" },
+J3: { sallePerso: 3, scene: "Coulisses", nom: "Michel", role: "Meurtrier", perso: "Producteur", vivant: true, type:
+"Gpt" },
+currentSalle: "SallePublic",
 buzzActive: false
 },
 history: [] // {sender: 'salleKey', message: 'texte', target: 'salleKey'}
