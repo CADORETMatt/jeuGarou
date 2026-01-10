@@ -618,6 +618,8 @@
                 mode = 'joueur';
                 toggleMJBtn.textContent = "Mode: Joueur";
                 mjPanel.style.display = 'none';
+                ViewedPlayer = 'J1';
+                loadPlayerParams();
 
             }
 
@@ -937,7 +939,7 @@ Réagis à la dernière interaction dans la scène avec Toi.
             buzz.style.display = 'block';
             buzzNext.style.display = 'block';
             // Paramètres joueurs
-            playerParams.style.display = isMJ ? 'block' : 'none';
+            // playerParams.style.display = isMJ ? 'block' : 'none';
             // Boutons TB visibles en MJ seulement
             // document.getElementById('player-buttons').style.display = isMJ ? 'flex' : 'none';
             document.getElementById('player-buttons').style.display =
@@ -997,9 +999,7 @@ Renvoie UNIQUEMENT un nouvel ADN JSON.
         function updateCardPlayer() {
             renderPlayerPresentation();
 
-            const canEdit =
-                mode === 'mj' ||
-                (mode === 'joueur' && User1is === 'J1'); // plus tard Supabase
+            const canEdit = mode === 'mj' || mode === 'joueur';
 
             playerParams.style.display = canEdit ? 'block' : 'none';
 
@@ -1007,7 +1007,11 @@ Renvoie UNIQUEMENT un nouvel ADN JSON.
                 loadPlayerParams(User1is);
             }
 
-            updateCardPlayerButtons();
+            const title = document.getElementById('params-title');
+            title.textContent =
+                mode === 'mj'
+                    ? `Paramètres – ${User1is}`
+                    : 'Mes paramètres';
         }
         //////////////Présentation Joueur///////////////////
         function canEditPlayer(playerKey) {
@@ -1039,7 +1043,7 @@ Renvoie UNIQUEMENT un nouvel ADN JSON.
                 title = `${currentSalle} (${player.nom})`;
                 scene = player.scene;
             }
-            //  info.innerHTML = `<h2>${title} – ${scene}</h2>`;
+            info.innerHTML = `<h2>${title} – ${scene}</h2>`;
             const joueurs = Object.entries(partie.adn)
                 .filter(([k, v]) => playerKeys.includes(k) && typeof v === 'object' && v.scene === scene && v.vivant)
                 .map(([k, v]) => v.nom)
@@ -1051,10 +1055,10 @@ Renvoie UNIQUEMENT un nouvel ADN JSON.
             const title = document.getElementById('room-title');
             const dots = document.getElementById('room-dots');
 
-            title.textContent =
+            /*title.textContent =
                 currentSalle === 'SallePublic'
                     ? `Salle commune – ${partie.adn.SallePublic}`
-                    : `Salle ${currentSalle.replace('J', '')}`;
+                    : `Salle ${currentSalle.replace('J', '')}`;*/
 
             dots.innerHTML = '';
 
