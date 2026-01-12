@@ -6,12 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tralala - Jeu Garou Mortel</title>
     <style>
-        * {
-            padding: 0;
-            margin: 0;
-            box-sizing: border-box;
-        }
-
         :root {
             --background-color: #222;
             --background-secondary: #000;
@@ -21,7 +15,7 @@
             --box-shadow-color: #FF06B5;
             --border-color: #333;
             --input-bg: #1c1c1c;
-            --button-hover-bg: #555;
+            --button-hover-bg: #ff06b5;
             --sidebar-bg: #1b1b1b;
             --log-bg: #000;
             --footer-color: #aaa;
@@ -32,434 +26,254 @@
         }
 
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-            background: radial-gradient(circle at top, var(--background-color) 0%, var(--background-secondary) 60%);
+            background-color: var(--background-color);
             color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            font-family: Arial, sans-serif;
         }
 
-        #buzz-next {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: radial-gradient(circle at top, #44ff88, #117733);
-            box-shadow: 0 0 25px rgba(0, 255, 128, 0.6);
-            color: black;
-            font-weight: bold;
+        button {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border: solid 2px var(--accent-color);
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: var(--border-radius);
             cursor: pointer;
-            border: none;
         }
 
-        #sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 320px;
-            background: var(--sidebar-bg);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
-            z-index: 10;
-            overflow-y: auto;
-        }
-
-        #sidebar h2 {
-            color: var(--text-color);
-        }
-
-        #sidebar button {
-            padding: 10px;
-            background: var(--primary-color);
-            color: var(--text-color);
-            border: 2px solid var(--accent-color);
-            cursor: pointer;
-            border-radius: 8px;
-            text-align: left;
-        }
-
-        #sidebar button:hover {
-            color: var(--accent-color);
-            box-shadow: 0 0 10px var(--box-shadow-color);
-        }
-
-        #sidebar button.active {
-            background: var(--button-hover-bg);
-        }
-
-        #player-params {
-            margin-top: 20px;
-            padding: 10px;
-            background: var(--primary-color);
-            border: 2px solid var(--accent-color);
-            border-radius: 8px;
-            display: none;
-        }
-
-        #player-params label {
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        #player-params input,
-        #player-params select {
-            width: 100%;
-            padding: 5px;
-            background: var(--input-bg);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-        }
-
-        #player-params button {
-            margin-top: 10px;
-        }
-
-        #main {
-            position: relative;
-            margin-left: 320px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            overflow: hidden;
-        }
-
-        #display {
-            flex: 1;
-            background: var(--log-bg);
-            border-radius: 8px;
-            padding: 10px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            font-size: 0.9rem;
-        }
-
-        #display p {
-            margin-bottom: 10px;
-            display: none;
-            /* Par défaut caché, visible via JS */
-        }
-
-        #display p.visible {
-            display: block;
-        }
-
-        #input-zone {
-            display: flex;
-            padding: 10px;
-            background: #111;
-            border-top: 1px solid var(--border-color);
-        }
-
-        #message-input {
-            flex: 1;
-            padding: 10px;
-            background: var(--input-bg);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            margin-right: 10px;
-        }
-
-        #send-btn {
-            padding: 10px 20px;
-            background: var(--primary-color);
-            color: var(--text-color);
-            border: 2px solid var(--accent-color);
-            cursor: pointer;
-            border-radius: 8px;
-        }
-
-        #send-btn:hover {
-            color: var(--accent-color);
-            box-shadow: 0 0 10px var(--box-shadow-color);
-        }
-
-        #buzz-zone {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 24px;
-            padding: 10px;
-        }
-
-        #buzz {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: radial-gradient(circle at top, #ff4444, #990000);
-            box-shadow: 0 0 40px var(--buzz-glow);
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            opacity: var(--buzz-inactive-opacity);
-            border: none;
-        }
-
-        #buzz.active {
-            opacity: 1;
-            animation: pulse 1.2s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 25px rgba(255, 0, 0, 0.5);
-            }
-
-            50% {
-                box-shadow: 0 0 55px rgba(255, 0, 0, 0.9);
-            }
-
-            100% {
-                box-shadow: 0 0 25px rgba(255, 0, 0, 0.5);
-            }
-        }
-
-        footer {
-            text-align: center;
-            padding: 10px;
-            font-size: 0.75rem;
-            color: var(--footer-color);
-            background: #111;
-        }
-
-        #player-buttons {
-            display: flex;
-            gap: 8px;
-            justify-content: space-between;
-        }
-
-        #player-buttons button {
-            flex: 1;
-            text-align: center;
-        }
-
-        @media (min-width: 900px) {
-            #player-presentation {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-            }
-
-            #player-params label {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-            }
-        }
-
-        #player-presentation p {
-            background: #111;
-            padding: 8px;
-            border-radius: 6px;
-        }
-
-        #mj-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 420px;
-            max-height: 45vh;
-            overflow: auto;
-
-            background: #0b0b0b;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 10px;
-
-            font-size: 0.75rem;
-            white-space: pre-wrap;
-            display: none;
-            z-index: 5;
-        }
-
-        #room-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /*/////////////Aff. Salles en cours//////////////////////////////*/
-        #room-dots {
-            display: flex;
-            align-items: center;
-            min-height: 30px;
-            /* IMPORTANT */
-            gap: 4px;
-            flex-wrap: wrap;
-        }
-
-        .room-dot {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: auto;
-            padding: 4px 8px;
-            height: 24px;
-            min-width: 60px;
-            border-radius: 12px;
-            background: #444;
-            cursor: default;
-            /* Non cliquable */
-            opacity: 0.5;
-            font-size: 0.8rem;
-        }
-
-        .room-dot.active {
-            background: #FF06B5;
-            box-shadow: 0 0 8px #FF06B5;
-            opacity: 1;
-            color: #fff;
-        }
-
-        /*/////////Abandon/////////////////*/
-        #modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            z-index: 100;
-        }
-
-        #abandon-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #111;
-            padding: 20px;
-            border-radius: 10px;
-            width: 300px;
-            display: none;
-            z-index: 101;
-        }
-
-        @media (max-width: 768px) {
-            #sidebar {
-                position: relative;
-                top: auto;
-                bottom: auto;
-                left: auto;
-                width: 100%;
-                height: auto;
-                flex-direction: row;
-                overflow-x: auto;
-                padding: 10px;
-                gap: 4px;
-            }
-
-            #main {
-                margin-left: 0;
-                padding: 10px;
-                margin-top: 120px;
-                overflow-y: auto;
-            }
-
-            #player-params {
-                margin-top: 10px;
-                padding: 5px;
-            }
-
-            #display {
-                font-size: 0.8rem;
-                padding: 5px;
-                flex: 1;
-                min-height: 50vh;
-            }
-
-            #buzz-zone {
-                gap: 12px;
-                padding: 5px;
-            }
-
-            #buzz {
-                width: 80px;
-                height: 80px;
-            }
-
-            #buzz-next {
-                width: 60px;
-                height: 60px;
-            }
-
-            #input-zone {
-                padding: 5px;
-            }
-
-            #message-input {
-                padding: 5px;
-                font-size: 0.8rem;
-            }
-
-            #send-btn {
-                padding: 5px 10px;
-                font-size: 0.8rem;
-            }
-
-            #player-buttons button {
-                height: 30px;
-                font-size: 0.8rem;
-                padding: 4px 8px;
-            }
-
-            #player-presentation p {
-                padding: 4px;
-                font-size: 0.8rem;
-            }
-
-            #player-params label {
-                margin-bottom: 5px;
-                font-size: 0.8rem;
-            }
-
-            #player-params input,
-            #player-params select {
-                padding: 3px;
-                font-size: 0.8rem;
-            }
-
-            #mj-panel {
-                width: 100%;
-                right: 0;
-                top: 100px;
-                padding: 5px;
-                font-size: 0.7rem;
-            }
-
-            #mj-panel textarea {
-                width: 100%;
-                rows: 6;
-            }
-
-            #room-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            #abandon-modal {
-                width: 90%;
-                padding: 10px;
-            }
-
-            #abandon-modal input,
-            #abandon-modal button {
-                font-size: 0.8rem;
-            }
-
-            body {
-                font-size: 0.8rem;
-            }
+        button:hover {
+            background-color: var(--button-hover-bg);
         }
     </style>
 </head>
 
 <body>
+    <style>
+        #modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: block;
+            z-index: 100;
+        }
+
+        #newPartie-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--primary-color);
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            display: block;
+            z-index: 101;
+        }
+
+        .player-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        #cancel-abandon {
+            display: none;
+        }
+    </style>
+    <div id="modal-overlay"></div>
+    <div id="newPartie-modal">
+        <h2>Initier <br>une nouvelle partie ?</h2>
+        <button id="load-partie">📂 Ouvrir une partie</button>
+        <input type="file" id="load-file" accept="application/json" style="display:none">
+        <div class="player-line">
+            <input type="text" placeholder="Auto ou écrire lieu, situation" adn-lieu="lieu">
+        </div>
+        <div class="player-line">
+            <input type="text" placeholder="Auto ou écrire lieu public" adn-public="sallePublic">
+        </div>
+        <div class="player-line">
+            <input type="text" placeholder="Auto ou écrire nom J1" value="Toi" adn-player="J1">
+        </div>
+        <div class="player-line">
+            <input type="text" placeholder="Auto ou écrire nom J2" adn-player="J2">
+            <label>
+                <input type="checkbox" adn-gpt="gpt" checked> ChatBot
+            </label>
+        </div>
+
+        <div class="player-line">
+            <input type="text" placeholder="Auto ou écrire nom J3" adn-player="J3">
+            <label>
+                <input type="checkbox" adn-gpt="gpt" checked> ChatBot
+            </label>
+        </div>
+        <div class="modal-actions">
+            <button id="start-game">Générer Partie</button>
+            <button id="cancel-abandon">Annuler</button>
+        </div>
+    </div>
+    <script>/////////////ADN///////////////////////
+        const startAdn = {
+            lieu: "",
+            sallePublic: "",
+            players: {
+                J1: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "Humain" },
+                J2: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "Gpt" },
+                J3: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "Gpt" }
+            },
+            currentSalle: "sallePublic",
+            buzzActive: false
+        }
+        let user1is = 'J1'; // Définition globale pour le joueur local
+
+        ////////Overlay//////////////////////////////////////
+        const overlay = document.getElementById('modal-overlay');
+        const modal = document.getElementById('newPartie-modal');
+        ///////////OUVRIR //////////////////////////////
+        document.getElementById('load-partie').addEventListener('click', () => {
+            document.getElementById('load-file').click();
+        });
+
+        document.getElementById('load-file').addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const loaded = JSON.parse(reader.result);
+                    partie = loaded;
+
+                    //  updateCardPlayer();
+                    //updateSalle();
+                    //updateMJAdnView();
+                    //showMessages();
+                } catch {
+                    alert('Chargé mais fichier JSON peut-être invalide');
+                }
+            };
+            reader.readAsText(file);
+            closeNewPartieModal(); // Fermer modal après load
+            updateRoomInfo(); // Actualiser affichage
+        });
+        function openNewPartieModal() {
+            overlay.style.display = 'block';
+            modal.style.display = 'block';
+            document.getElementById("cancel-abandon").style.display = 'block';
+            document.getElementById("cancel-abandon").onclick = function () {
+                closeNewPartieModal();
+            }
+        }
+        function closeNewPartieModal() {
+            overlay.style.display = 'none';
+            modal.style.display = 'none';
+            loadPlayerParams(); // Charger les params du joueur après fermeture modal
+            //actualise tableau mj
+            //updateCardPlayerButtons();
+            //updateCardPlayer();
+            //applyPermissions();
+            updateRoomInfo();   // Actualiser affichage
+
+        }
+        ////////New Partie//////////////////
+        document.getElementById('start-game').addEventListener('click', () => {
+            const players = [];
+
+            document.querySelectorAll('[adn-player]').forEach(input => {
+                const key = input.getAttribute('adn-player');
+                const name = input.value || "";
+                const isGpt = input.parentElement.querySelector('[adn-gpt]')?.checked;
+                players.push({
+                    key,
+                    nom: name,
+                    type: isGpt ? 'gpt' : 'Humain'
+                });
+
+                /*const key = input.dataset.player;
+    const name = input.value || key;
+    const isGpt = document.querySelector(`[adn-gpt]`).checked;*/
+                //change partie.adn.lieu
+                startAdn.lieu = document.querySelector('[adn-lieu]').value || "";
+                //partie.adn.lieu = inputLieu;
+                startAdn.sallePublic = document.querySelector('[adn-public]').value || "";
+                /*     key,
+                     nom: name,
+                     lieu: place,
+                     sallePublic: public,
+                     type: isGpt ? 'gpt' : 'Humain'
+                 });
+              players: {
+                 J1: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "Humain" },
+                 J2: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "Gpt" },
+                 J3: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "Gpt" }
+             }*/
+            });
+
+            startNewGame(players);
+        });
+        function startNewGame(players) {
+            const exAdn = partie.adn;
+            // 🔴 PLUS TARD : GPT génère l’ADN ici
+            // 🔴 PLUS TARD : recherche / création de partie Supabase ici
+            // Pour l’instant : ADN simple
+            console.log("players= ", players);
+            startAdn.players = players; // Config pour buildMinimalAdn
+            partie.adn = buildMinimalAdn(startAdn);
+            partie.history = []; // Reset history pour nouvelle partie
+            //push partie 
+            console.log("partie = ", partie, " exAdn= ", exAdn);
+            console.log("adn= ", partie.adn, " startAdn= ", startAdn);
+
+            // Joueur local = premier humain
+            const human = players.find(p => p.type === 'Humain');
+            user1is = human?.key || 'J1';
+
+            closeNewPartieModal(); // Fermer modal au lieu de start-overlay
+
+            init(); // ton init existant
+        }
+        function buildMinimalAdn(startAdn) {
+            const j1 = startAdn.players.find(p => p.key === 'J1') || {};
+            const j2 = startAdn.players.find(p => p.key === 'J2') || {};
+            const j3 = startAdn.players.find(p => p.key === 'J3') || {};
+            return {
+                lieu: startAdn.lieu || "", // Si theme ajouté plus tard
+                sallePublic: startAdn.sallePublic,
+                players: {
+                    J1: {
+                        sallePerso: "",
+                        scene: "",
+                        nom: j1.nom || "",
+                        role: "",
+                        perso: j1.perso || "",
+                        vivant: true,
+                        type: j1.type || "Humain"
+                    },
+                    J2: {
+                        sallePerso: "",
+                        scene: "",
+                        nom: j2.nom || "",
+                        role: "",
+                        perso: j2.perso || "",
+                        vivant: true,
+                        type: j2.type || "gpt"
+                    },
+                    J3: {
+                        sallePerso: "",
+                        scene: "",
+                        nom: j3.nom || "",
+                        role: "",
+                        perso: j3.perso || "",
+                        vivant: true,
+                        type: j3.type || "gpt"
+                    }
+                },
+                currentSalle: "SallePublic",
+                buzzActive: false
+            };
+        }
+    </script>
     <div id="sidebar">
         <h2>Tableau de bord</h2>
         <div id="player-buttons">
@@ -483,6 +297,28 @@
             <label>Vivant: <input type="checkbox" id="param-vivant"></label>
             <button id="save-params">Sauvegarder</button>
         </div>
+        <script>
+            const playerParams = document.getElementById('player-params');
+            const paramName = document.getElementById('param-name');
+            const paramRole = document.getElementById('param-role');
+            const paramPerso = document.getElementById('param-perso');
+            const paramType = document.getElementById('param-type');
+            const paramScene = document.getElementById('param-scene');
+            const paramVivant = document.getElementById('param-vivant');
+            const saveParams = document.getElementById('save-params');
+            // Charger les params du joueur
+            function loadPlayerParams(playerKey = user1is) {
+                const player = partie.adn[playerKey];
+                if (!player || typeof player !== 'object') return;
+
+                paramName.value = player.nom;
+                paramRole.value = player.role;
+                paramPerso.value = player.perso;
+                paramType.value = player.type;
+                paramScene.value = player.scene;
+                paramVivant.checked = player.vivant;
+            }
+        </script>
     </div>
 
     <div id="main">
@@ -502,7 +338,53 @@
                 <button id="toggle-user">Vue : J1</button>
             </div>
         </div>
+        <script>
+            //////////// Btn MJ  ////////////////////////
+            let mode = 'joueur'; // ou 'mj'
+            const toggleMJBtn = document.getElementById('toggle-mj');
+            const mjPanel = document.getElementById('mj-panel');
+            const adnEditor = document.getElementById('adn-editor');
+            toggleMJBtn.addEventListener('click', () => {
+                if (mode === 'joueur') {
+                    mode = 'mj';
+                    toggleMJBtn.textContent = "Mode: MJ";
+                    mjPanel.style.display = 'block';
+                    adnEditor.value = JSON.stringify(partie.adn, null, 2);// Affiche ADN
+                } else {
+                    mode = 'joueur';
+                    toggleMJBtn.textContent = "Mode: Joueur";
+                    mjPanel.style.display = 'none';
+                    //ViewedPlayer = 'J1';
+                    loadPlayerParams();
 
+                }
+                //applyPermissions();
+            });
+            document.getElementById('apply-adn').addEventListener('click', () => {
+                const origin = mode === 'mj' ? 'MJ' : /*ViewedPlayer*/console.log("Apply Viewed");
+                applyAdnChange(origin);
+            });
+            function applyAdnChange(origin = 'MJ') {
+                console.log("origin= ", origin);
+                try {
+                    const parsedAdn = JSON.parse(adnEditor.value);
+                    partie.adn = parsedAdn;
+
+                    partie.history.push({
+                        sender: 'System',
+                        message:
+                            origin === 'MJ'
+                                ? '🔄 L’ADN du scénario a été modifié par le MJ.'
+                                : `✏️ ${partie.adn[origin]?.nom ?? origin} a modifié ses paramètres.`,
+                        target: null
+                    });
+                    updateCardPlayer(); showMessages();
+                    updateSalle(); // Ajouté pour rafraîchir les dots après modification ADN
+                } catch (e) {
+                    alert("ADN invalide (JSON incorrect)");
+                }
+            }
+        </script>
         <div id="room-info"></div>
         <!--A FAIRE : Mettre titre à gauche et Bouton MJ/Joueur à droite dans même div-->
 
@@ -525,579 +407,38 @@
         <button id="abandon-btn">Abandonner la partie</button>
         <button id="save-partie">💾 Sauvegarder la partie</button>
     </footer>
-    <div id="modal-overlay"></div>
-
-    <div id="abandon-modal">
-        <h2>Initier une nouvelle partie ?</h2>
-        <button id="load-partie">📂 Ouvrir une partie</button>
-        <input type="file" id="load-file" accept="application/json" style="display:none">
-        <p>Nom du personnage :</p>
-        <input id="abandon-name" type="text" />
-
-        <div class="modal-actions">
-            <button id="confirm-abandon">Générer Partie</button>
-            <button id="cancel-abandon">Annuler</button>
-        </div>
-    </div>
-
     <script>
-        // OpenAI API Key
-        const OPENAI_API_KEY = "VOTRE_CLE_API_ICI";
-
         // Objet Partie contenant ADN et historique
         let partie = {
             adn: {
-                Lieu: "Émission TV « Tralala »",
-                Buzz: "inactif",
-                SallePublic: "Pupitre TV",
-                J1: { sallePerso: 1, scene: "Epreuve", nom: "Toi", role: "Justicier", perso: "Animateur", vivant: true, type: "Humain" },
-                J2: { sallePerso: 2, scene: "Loge", nom: "Robert", role: "Acolyte", perso: "Candidat", vivant: true, type: "Gpt" },
-                J3: { sallePerso: 3, scene: "Coulisses", nom: "Michel", role: "Meurtrier", perso: "Producteur", vivant: true, type: "Gpt" },
-                currentSalle: "SallePublic",
+                lieu: "Émission TV « Tralala »",
+                sallePublic: "Pupitre TV",
+                players: {
+                    J1: { sallePerso: 1, scene: "Epreuve", nom: "Toi", role: "Justicier", perso: "Animateur", vivant: true, type: "Humain" },
+                    J2: { sallePerso: 2, scene: "Loge", nom: "Robert", role: "Acolyte", perso: "Candidat", vivant: true, type: "gpt" },
+                    J3: { sallePerso: 3, scene: "Coulisses", nom: "Michel", role: "Meurtrier", perso: "Producteur", vivant: true, type: "gpt" }
+                },
+                currentSalle: "sallePublic",
                 buzzActive: false
             },
             history: [] // {sender: 'salleKey', message: 'texte', target: 'salleKey'}
         };
 
-        const display = document.getElementById('display');
-        const messageInput = document.getElementById('message-input');
-        const sendBtn = document.getElementById('send-btn');
-        const buzz = document.getElementById('buzz');
-        const buzzInfo = document.getElementById('buzz-info');
-        const playerParams = document.getElementById('player-params');
-        const paramName = document.getElementById('param-name');
-        const paramRole = document.getElementById('param-role');
-        const paramPerso = document.getElementById('param-perso');
-        const paramType = document.getElementById('param-type');
-        const paramScene = document.getElementById('param-scene');
-        const paramVivant = document.getElementById('param-vivant');
-        const saveParams = document.getElementById('save-params');
-        ////////Abandon//////////////////////////////////////
-        const overlay = document.getElementById('modal-overlay');
-        const modal = document.getElementById('abandon-modal');
-        //////Salles//////////////////
-        const salles = ['SallePublic', 'J1', 'J2', 'J3'];
-        const salleOrder = ['SallePublic', 'J1', 'J2', 'J3'];
-        let mode = 'joueur'; // ou 'mj'
-        let currentSalle = 'SallePublic'; // Par défaut, salle du joueur
-        ///////View des joueur////////////////
-        const viewUser = ['MJ', 'joueur'];
-        const playerKeys = ['J1', 'J2', 'J3'];
-        //let ViewedPlayer = playerKeys[0]; // J1 par défaut (source de vérité : playerKeys)
-        let ViewedPlayer = 'J1';
-        let User1is = 'J1'; // joueur local (ou vue MJ)
-
-        const toggleUserBtn = document.getElementById('toggle-user');
-        toggleUserBtn.addEventListener('click', () => {
-            if (mode !== 'mj') return;
-
-            const index = playerKeys.indexOf(User1is);
-            User1is = playerKeys[(index + 1) % playerKeys.length];
-
-            toggleUserBtn.textContent = `Vue : ${User1is}`;
-            updateCardPlayer();
-        });
-        /*toggleUserBtn.addEventListener('click', () => {
-            const index = playerKeys.indexOf(ViewedPlayer);
-            const newIndex = (index + 1) % playerKeys.length;
-            ViewedPlayer = playerKeys[newIndex];
-            toggleUserBtn.textContent = `Vue : ${ViewedPlayer}`;
-            updateViewPlayer();
-        });*/
-        //////////// Btn MJ  ////////////////////////
-        const toggleMJBtn = document.getElementById('toggle-mj');
-        const mjPanel = document.getElementById('mj-panel');
-        const adnEditor = document.getElementById('adn-editor');
-        toggleMJBtn.addEventListener('click', () => {
-            if (mode === 'joueur') {
-                mode = 'mj';
-                toggleMJBtn.textContent = "Mode: MJ";
-                mjPanel.style.display = 'block';
-                adnEditor.value = JSON.stringify(partie.adn, null, 2);
-            } else {
-                mode = 'joueur';
-                toggleMJBtn.textContent = "Mode: Joueur";
-                mjPanel.style.display = 'none';
-                ViewedPlayer = 'J1';
-                loadPlayerParams();
-
-            }
-
-            applyPermissions();
-        });
-        //////////////  Inject ADN /////////////////
-        /*function applyAdnChange(newAdn, origin = 'MJ') {
-            partie.adn = newAdn;
-
-            partie.history.push({
-                sender: 'System',
-                message:
-                    origin === 'MJ'
-                        ? '🔄 L’ADN du scénario a été modifié par le MJ.'
-                        : `✏️ ${partie.adn[origin]?.nom ?? origin} a modifié ses paramètres.`,
-                target: null
-            });
-            updateCardPlayer(); showMessages();
-        }*/
-
-        function applyAdnChange(origin = 'MJ') {
-            try {
-                const parsedAdn = JSON.parse(adnEditor.value);
-                partie.adn = parsedAdn;
-
-                partie.history.push({
-                    sender: 'System',
-                    message:
-                        origin === 'MJ'
-                            ? '🔄 L’ADN du scénario a été modifié par le MJ.'
-                            : `✏️ ${partie.adn[origin]?.nom ?? origin} a modifié ses paramètres.`,
-                    target: null
-                });
-                updateCardPlayer(); showMessages();
-                updateSalle(); // Ajouté pour rafraîchir les dots après modification ADN
-            } catch (e) {
-                alert("ADN invalide (JSON incorrect)");
-            }
-        }
-
-        document.getElementById('apply-adn').addEventListener('click', () => {
-            const origin = mode === 'mj' ? 'MJ' : ViewedPlayer;
-            applyAdnChange(origin);
-        });
-        ////////////Next Salle /////////////////
-        const buzzNext = document.getElementById('buzz-next');
-
-        buzzNext.addEventListener('click', (e) => {
-            if (e.shiftKey) {
-                //toggleSalle();
-            } else {
-                nextSalle(); updateCardPlayer();
-            }
-        });
-        /////////////////Sauvegarder////////////////////////
-        document.getElementById('save-partie').addEventListener('click', () => {
-            const data = JSON.stringify(partie, null, 2);
-            const blob = new Blob([data], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'partie.json';
-            a.click();
-
-            URL.revokeObjectURL(url);
-        });
-        ///////////OUVRIR //////////////////////////////
-        document.getElementById('load-partie').addEventListener('click', () => {
-            document.getElementById('load-file').click();
-        });
-
-        document.getElementById('load-file').addEventListener('change', e => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = () => {
-                try {
-                    const loaded = JSON.parse(reader.result);
-                    partie = loaded;
-
-                    updateCardPlayer();
-                    updateSalle();
-                    //updateMJAdnView();
-                    showMessages();
-                } catch {
-                    alert('Chargé mais fichier JSON peut-être invalide');
-                }
-            };
-            reader.readAsText(file);
-            closeAbandonModal(); // Fermer modal après load
-            updateRoomInfo(); // Actualiser affichage
-        });
-        ///////////Abandon///////////////////////////////////
-        document.getElementById('cancel-abandon').onclick = closeAbandonModal;
-
-        document.getElementById('confirm-abandon').onclick = async () => {
-            console.log("Abandon. Relance gpt");
-            alert("Prochainnement relié à Gpt !");
-            const name = document.getElementById('abandon-name').value || 'Un joueur';
-
-            closeAbandonModal();
-
-            const newAdn = await askGPT(
-                'Tu es un maître du jeu.',
-                `Le joueur ${name} abandonne. Réécris un ADN cohérent.`
-            );
-
-            applyAdnChange(JSON.parse(newAdn), 'System');
-        };
-        ///////////Mes params/////////////////
-        const title = document.getElementById('params-title');
-
-        if (mode === 'mj') {
-            title.textContent = `Paramètres – ${User1is}`;
-        } else {
-            title.textContent = 'Mes paramètres';
-        }
-        /////////////////////////////        // Fonction pour afficher les messages
-        function showMessages() {
-            display.innerHTML = '';
-            partie.history.forEach(msg => {
-                const isRelevant = (msg.sender === 'J1' && msg.target === currentSalle) ||
-                    (msg.sender === currentSalle && msg.target === 'J1') ||
-                    ((currentSalle === 'J1' || currentSalle === 'SallePublic') && !msg.target); // Publique
-
-                if (isRelevant) {
-                    const p = document.createElement('p');
-                    const senderName =
-                        msg.sender === 'System'
-                            ? '🕯️ Système'
-                            : partie.adn[msg.sender]?.nom ?? msg.sender;
-                    p.textContent = `${senderName}: ${msg.message}`;
-                    p.classList.add('visible'); // Toujours visible si relevant
-                    if (partie.adn[currentSalle] && typeof partie.adn[currentSalle] === 'object' && !partie.adn[currentSalle].vivant) {
-                        p.style.display = 'none'; // Invisible si absent
-                    }
-                    display.appendChild(p);
-                }
-            });
-            display.scrollTop = display.scrollHeight;
-        }
-
-        // Appel à l'API OpenAI
-        async function askGPT(systemPrompt, userPrompt) {
-            const res = await fetch("https://api.openai.com/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${OPENAI_API_KEY}`
-                },
-                body: JSON.stringify({
-                    model: "gpt-4o-mini",
-                    messages: [
-                        { role: "system", content: systemPrompt },
-                        { role: "user", content: userPrompt }
-                    ],
-                    temperature: 0.9
-                })
-            });
-            const data = await res.json();
-            return data.choices[0].message.content;
-        }
-
-        // Réponse d'un joueur IA
-        async function getIAResponse(salleKey) {
-            const player = partie.adn[salleKey];
-            if (player.type !== 'Gpt' || !player.vivant) return null;
-
-            const systemPrompt = `
-Tu es ${player.nom} (${player.perso}), rôle secret: ${player.role}.
-Tu joues UNIQUEMENT ton personnage.
-Tu n'écris QUE tes dialogues ou actions (1-2 phrases max).
-Si tu es le meurtrier, tu te fais passer pour bienveillant.
-Respecte l'ADN comme carnet de bord.
-`;
-
-            const userPrompt = `
-ADN{
-${JSON.stringify(partie.adn, null, 2)}
-}
-
-Réagis à la dernière interaction dans la scène avec Toi.
-`;
-
-            return await askGPT(systemPrompt, userPrompt);
-        }
-
-        // Activation du buzz
-        function activateBuzz() {
-            partie.adn.Buzz = "actif";
-            partie.adn.buzzActive = true;
-            buzz.classList.add('active');
-            buzzInfo.textContent = "Le buzz est ACTIF. Un choix peut tuer.";
-        }
-
-        // Gestion des boutons joueurs (limiter la sélection aux boutons joueurs)
-        const playerButtons = document.querySelectorAll('#player-buttons button');
-        playerButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                playerButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const raw = btn.id.replace('btn-', '');
-                /*ViewedPlayer = raw.charAt(0).toUpperCase() + raw.slice(1);
-                loadPlayerParams();*/
-                if (mode !== 'mj') return;
-                User1is = raw.charAt(0).toUpperCase() + raw.slice(1);
-                loadPlayerParams(User1is);
-                updateCardPlayer();
-            });
-        });
-        // Charger les params du joueur
-        function loadPlayerParams(playerKey = User1is) {
-            const player = partie.adn[playerKey];
-            if (!player || typeof player !== 'object') return;
-
-            paramName.value = player.nom;
-            paramRole.value = player.role;
-            paramPerso.value = player.perso;
-            paramType.value = player.type;
-            paramScene.value = player.scene;
-            paramVivant.checked = player.vivant;
-        }
-
-        // Sauvegarder les params
-        saveParams.addEventListener('click', () => {
-            const player = partie.adn[ViewedPlayer];
-            player.nom = paramName.value;
-            player.perso = paramPerso.value;
-            player.type = paramType.value;
-            player.scene = paramScene.value;
-            player.vivant = paramVivant.checked;
-            // Mise à jour des boutons si nom change
-            const btnEl = document.getElementById(`btn-${ViewedPlayer.toLowerCase()}`);
-            if (btnEl) btnEl.textContent = `Joueur ${ViewedPlayer.replace('J', '')} (#${player.nom})`;
-
-            // Enregistrer modification dans l'historique et mettre à jour l'UI
-            partie.history.push({
-                sender: 'System',
-                message: `✏️ ${partie.adn[ViewedPlayer]?.nom ?? ViewedPlayer} a modifié ses paramètres.`,
-                target: null
-            });
-            updateCardPlayer();
-            showMessages();
-        });
-
-        // Envoi de message
-        sendBtn.addEventListener('click', async () => {
-            const message = messageInput.value.trim();
-            if (!message) return;
-
-            const target = (currentSalle !== 'J1' && currentSalle !== 'SallePublic') ? currentSalle : null;
-            partie.history.push({ sender: 'J1', message, target });
-            showMessages();
-            messageInput.value = '';
-
-            if (target) {
-                // Conversation privée
-                const response = await getIAResponse(target);
-                if (response) {
-                    partie.history.push({ sender: target, message: response, target: 'J1' });
-                    showMessages();
-                }
-            } else {
-                // Publique, répondre les autres si GPT et vivants
-                for (let salle of ['J2', 'J3']) {
-                    const response = await getIAResponse(salle);
-                    if (response) {
-                        partie.history.push({ sender: salle, message: response, target: null });
-                    }
-                }
-                showMessages();
-            }
-        });
-
-        // Gestion du buzz
-        buzz.addEventListener('click', () => {
-            if (!partie.adn.buzzActive) return;
-            const msg = "👉 Tu appuies sur le buzz.";
-            partie.history.push({ sender: 'System', message: msg, target: null });
-            if (partie.adn.J3.vivant) {
-                const killMsg = "💥 PAN ! Michel est démasqué comme meurtrier.";
-                partie.history.push({ sender: 'System', message: killMsg, target: null });
-                partie.adn.J3.vivant = false;
-            }
-            buzz.disabled = true;
-            showMessages();
-        });
-
-        ///////////Toujours visible Salle/Perso/////////
-        function renderPlayerPresentation() {
-            const presentation = document.getElementById('player-presentation');
-
-            const players = Object.entries(partie.adn)
-                .filter(([k, v]) => v.nom)
-                .map(([k, v], i) => `
-      <p>
-        <strong>J${i + 1} – ${v.nom}</strong><br>
-        ${v.perso}<br>
-        ${v.vivant ? '🫀 Vivant' : '☠️ Mort'}
-      </p>
-    `)
-                .join('');
-
-            presentation.innerHTML = `<h3>Personnages</h3>${players}`;
-        }
-
-        /////////////////// Autorisations   //////////////////////////////
-        function applyPermissions() {
-            const isMJ = mode === 'mj';
-
-            // Écriture
-            messageInput.disabled = !isMJ && currentSalle !== 'J1' && currentSalle !== 'SallePublic';
-
-            // Buzz = gameplay → jamais caché
-            buzz.style.display = 'block';
-            buzzNext.style.display = 'block';
-            // Paramètres joueurs
-            // playerParams.style.display = isMJ ? 'block' : 'none';
-            // Boutons TB visibles en MJ seulement
-            // document.getElementById('player-buttons').style.display = isMJ ? 'flex' : 'none';
-            document.getElementById('player-buttons').style.display =
-                mode === 'mj' ? 'flex' : 'none';
-            // Bouton Vue J# uniquement MJ
-            toggleUserBtn.style.display =
-                mode === 'mj' ? 'inline-block' : 'none';
-
-        }
-        async function NewPartie(nom) {
-            const prompt = `
-Voici l'ADN actuel :
-${JSON.stringify(partie.adn, null, 2)}
-
-Le joueur ${nom} abandonne.
-Redéfinis un nouveau scénario cohérent.
-Renvoie UNIQUEMENT un nouvel ADN JSON.
-`;
-
-            const newAdn = await askGPT(
-                "Tu es un maître du jeu narratif.",
-                prompt
-            );
-
-            partie.adn = JSON.parse(newAdn);
-            partie.history = [];
-            updateCardPlayer();
-            updateSalle(); // Ajouté pour rafraîchir les dots après nouvelle partie
-            showMessages();
-        }
-        function toggleSalle() {
-            // mode = mode === 'joueur' ? 'mj' : 'joueur';
-            //buzzNext.textContent = mode === 'mj' ? 'MJ' : 'Joueur';
-        }
-        ////////////////Gestion Salle ///////////////////////////////////
-        function nextSalle() {
-            const index = salleOrder.indexOf(currentSalle);
-            currentSalle = salleOrder[(index + 1) % salleOrder.length];
-            partie.adn.currentSalle = currentSalle;
-            /*if (playerKeys.includes(currentSalle)) {
-                //ViewedPlayer = currentSalle;
-                loadPlayerParams();
-                playerButtons.forEach(b => b.classList.remove('active'));
-                const el = document.getElementById(`btn-${currentSalle.toLowerCase()}`);
-                if (el) el.classList.add('active');
-            } else {
-                playerButtons.forEach(b => b.classList.remove('active'));
-            }*/
-            updateRoomInfo();
-            updateSalle(); // Ajouté pour rafraîchir les dots lors du changement de salle
-            showMessages();
-        }
-
-        function updateViewPlayer() {
-            loadPlayerParams();
-        }
-        function updateCardPlayer() {
-            renderPlayerPresentation();
-
-            const canEdit = mode === 'mj' || mode === 'joueur';
-
-            playerParams.style.display = canEdit ? 'block' : 'none';
-
-            if (canEdit) {
-                loadPlayerParams(User1is);
-            }
-
-            const title = document.getElementById('params-title');
-            title.textContent =
-                mode === 'mj'
-                    ? `Paramètres – ${User1is}`
-                    : 'Mes paramètres';
-        }
-        //////////////Présentation Joueur///////////////////
-        function canEditPlayer(playerKey) {
-            if (mode === 'mj') return true;
-            return playerKey === 'J1'; // joueur local
-        }
-        function updateCardPlayerButtons() {
-            playerKeys.forEach((key, i) => {
-                const btn = document.getElementById(`btn-${key.toLowerCase()}`);
-                const p = partie.adn[key];
-                if (!btn || !p) return;
-
-                btn.textContent = `Joueur ${i + 1} (#${p.nom})`;
-            });
-        }
-        ////////////Joueur local Supabase /////////////////
-        /*function getLocalPlayer() {
-            return 'J1'; // pour l’instant navigateur = J1
-        }*/
-        function updateRoomInfo() {
-            const info = document.getElementById('room-info');
-            let title = '';
-            let scene = '';
-            if (currentSalle === 'SallePublic') {
-                title = 'Salle Publique';
-                scene = partie.adn.SallePublic;
-            } else {
-                const player = partie.adn[currentSalle];
-                title = `${currentSalle} (${player.nom})`;
-                scene = player.scene;
-            }
-            info.innerHTML = `<h2>${title} – ${scene}</h2>`;
-            const joueurs = Object.entries(partie.adn)
-                .filter(([k, v]) => playerKeys.includes(k) && typeof v === 'object' && v.scene === scene && v.vivant)
-                .map(([k, v]) => v.nom)
-                .join(', ');
-            info.innerHTML += `<p>👥 ${joueurs || 'Tout le monde'}</p>`;
-        }
-        ////////Aff. Salle en couurs /////////////////////////////
-        function updateSalle() {
-            const title = document.getElementById('room-title');
-            const dots = document.getElementById('room-dots');
-
-            /*title.textContent =
-                currentSalle === 'SallePublic'
-                    ? `Salle commune – ${partie.adn.SallePublic}`
-                    : `Salle ${currentSalle.replace('J', '')}`;*/
-
-            dots.innerHTML = '';
-
-            salles.forEach(salle => {
-                const dot = document.createElement('span');
-                dot.className = 'room-dot';
-                dot.textContent = salle === 'SallePublic' ? 'Salle commune' : `Salle ${salle.replace('J', '')}`;
-                if (salle === currentSalle) dot.classList.add('active');
-
-                dots.appendChild(dot);
-            });
-        }
-        ////////Abandon//////////////////////////////////////
-        function openAbandonModal() {
-            overlay.style.display = 'block';
-            modal.style.display = 'block';
-        }
-
-        function closeAbandonModal() {
-            overlay.style.display = 'none';
-            modal.style.display = 'none';
-        }
-
+        document.getElementById('abandon-btn').addEventListener('click', //async () => { await abandonnerPartie(partie.adn.J1.nom); }
+            () => openNewPartieModal());
         // Initialisation
         function init() {
             const welcome = "🎬 Bienvenue dans Tralala. Tu es l’Animateur (Justicier). Sélectionne une salle ou reste en public.";
             partie.history.push({ sender: 'System', message: welcome, target: null });
-            showMessages();
+            //   showMessages();
             loadPlayerParams();
-            updateCardPlayerButtons();
-            updateCardPlayer();
-            applyPermissions();
-            updateRoomInfo();
-            updateSalle(); // Ajouté pour générer les dots au démarrage
-            setTimeout(activateBuzz, 5000);
+            // updateCardPlayerButtons();
+            //updateCardPlayer();
+            //applyPermissions();
+            //updateRoomInfo();
+            //updateSalle(); // Ajouté pour générer les dots au démarrage
+            //setTimeout(activateBuzz, 5000);
         }
-        document.getElementById('abandon-btn').addEventListener('click', //async () => { await abandonnerPartie(partie.adn.J1.nom); }
-            () => openAbandonModal());
-        init();
     </script>
 </body>
 
