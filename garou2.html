@@ -13,10 +13,10 @@
             --primary-color: #470684;
             --accent-color: #FF06B5;
             --box-shadow-color: #FF06B5;
-            --border-color: #333;
+            --border-color: #ff06b5;
             --input-bg: #1c1c1c;
             --button-hover-bg: #ff06b5;
-            --sidebar-bg: #1b1b1b;
+            --sidebar-bg: #470684;
             --log-bg: #000;
             --footer-color: #aaa;
             --buzz-inactive-opacity: 0.4;
@@ -35,8 +35,10 @@
             background-color: var(--primary-color);
             color: var(--text-color);
             border: solid 2px var(--accent-color);
-            padding: 10px 15px;
-            margin: 5px;
+            padding: 5px 15px;
+            padding-left: 5px;
+            padding-right: 5px;
+            margin: 15px;
             border-radius: var(--border-radius);
             cursor: pointer;
         }
@@ -49,6 +51,11 @@
 
 <body>
     <style>
+        h2 {
+            margin: 0;
+            font-size: 16px;
+        }
+
         #modal-overlay {
             position: fixed;
             inset: 0;
@@ -68,6 +75,7 @@
             width: 300px;
             display: block;
             z-index: 101;
+            box-shadow: 0 10px 25px var(--box-shadow-color);
         }
 
         .player-line {
@@ -75,6 +83,18 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
+        }
+
+        #newPartie-modal input
+
+        /*[type="text"]*/
+            {
+            width: 65%;
+            padding: 5px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--input-bg);
+            color: var(--text-color);
         }
 
         #cancel-abandon {
@@ -145,12 +165,12 @@
                     const loaded = JSON.parse(reader.result);
                     partie = loaded;
 
-                    //  updateCardPlayer();
+                    updateCardPlayer();
                     //updateSalle();
                     //updateMJAdnView();
                     //showMessages();
                 } catch {
-                    alert('Chargé mais fichier JSON peut-être invalide');
+                    // alert('Chargé mais fichier JSON peut-être invalide');
                 }
             };
             reader.readAsText(file);
@@ -171,7 +191,7 @@
             loadPlayerParams(); // Charger les params du joueur après fermeture modal
             //actualise tableau mj
             //updateCardPlayerButtons();
-            //updateCardPlayer();
+            updateCardPlayer();
             //applyPermissions();
             updateRoomInfo();   // Actualiser affichage
 
@@ -223,7 +243,6 @@
             partie.history = []; // Reset history pour nouvelle partie
             //push partie 
             console.log("partie = ", partie, " exAdn= ", exAdn);
-            console.log("adn= ", partie.adn, " startAdn= ", startAdn);
 
             // Joueur local = premier humain
             const human = players.find(p => p.type === 'Humain');
@@ -274,16 +293,143 @@
             };
         }
     </script>
+    <style>
+        #TBsave {
+            display: flex;
+            flex-direction: row;
+        }
+
+        #sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: var(--sidebar-bg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px var(--box-shadow-color);
+            /*z-index: 10;*/
+        }
+
+        @media (min-width: 600px) {
+            #sidebar {
+                bottom: 0;
+                width: 320px;
+                gap: 20px;
+                overflow-y: auto;
+            }
+        }
+
+        @media (max-width: 600px) {
+            #sidebar {
+                display: block;
+                grid-template-columns: 1fr 1fr 1fr;
+                right: 0;
+                height: 190px;
+                gap: 5px;
+                /*scroll-horizontal*/
+                overflow-y: auto;
+                /*white-space: nowrap;*/
+
+            }
+
+        }
+    </style>
     <div id="sidebar">
         <h2>Tableau de bord</h2>
-        <div id="player-buttons">
+        <!--<div id="player-buttons">
             <button id="btn-j1">J1</button>
             <button id="btn-j2">J2</button>
             <button id="btn-j3">J3</button>
-        </div>
+        </div>-->
+        <style>
+            #player-presentation {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                /*gap: 12px;*/
+            }
+
+            @media (min-width: 600px) {}
+        </style>
         <div id="player-presentation"></div>
+        <script>
+            function renderPlayerPresentation() {
+                // user1is = 'J1';
+                const presentation = document.getElementById('player-presentation');
+
+                const players = Object.entries(partie.adn.players)
+                    .filter(([k, v]) => v.nom)
+                    .map(([k, v], i) => `
+      <p>
+        <strong>J${i + 1} – ${v.nom}</strong><br>
+        ${v.perso}<br>
+        ${v.type === 'Gpt' ? '🤖 IA' : '🧑 Humain'}<br>
+        ${v.vivant ? '🫀 Vivant' : '☠️ Mort'}
+      </p>
+    `)
+                    .join('');
+
+                presentation.innerHTML = `<h3>Personnages</h3>${players}`;
+            }
+            function updateCardPlayer() {
+                renderPlayerPresentation();
+
+                const canEdit = mode === 'mj' || mode === 'joueur';
+
+                playerParams.style.display = canEdit ? 'block' : 'none';
+
+                if (canEdit) {
+                    loadPlayerParams(user1is);
+                }
+
+                const title = document.getElementById('params-title');
+                title.textContent =
+                    mode === 'mj'
+                        ? `Paramètres – ${user1is}`
+                        : 'Mes paramètres';
+            }
+
+        </script>
+        <style>
+            #player-params input,
+            #player-params select {
+                /*padding: 5px;*/
+                background: var(--input-bg);
+                color: var(--text-color);
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+
+            }
+
+            #player-params label {}
+
+            @media (min-width: 600px) {
+                #player-params label {
+                    /*display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 12px;*/
+                    display: block;
+                    margin-bottom: 10px;
+                }
+
+                #player-params input,
+                #player-params select {
+                    width: 100%;
+                }
+            }
+
+            @media (max-width: 600px) {
+                #player-params label {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr 1fr;
+                }
+            }
+        </style>
         <div id="player-params">
-            <h3 id="params-title"></h3>
+            <div id="TBsave">
+                <button id="save-params">Sauvegarder</button>
+                <h3 id="params-title"></h3>
+            </div>
             <label>Nom: <input type="text" id="param-name"></label>
             <label>Role: <input type="text" id="param-role" readonly></label>
             <label>Personnage: <input type="text" id="param-perso"></label>
@@ -295,7 +441,6 @@
             </label>
             <label>Scène: <input type="text" id="param-scene"></label>
             <label>Vivant: <input type="checkbox" id="param-vivant"></label>
-            <button id="save-params">Sauvegarder</button>
         </div>
         <script>
             const playerParams = document.getElementById('player-params');
@@ -308,19 +453,63 @@
             const saveParams = document.getElementById('save-params');
             // Charger les params du joueur
             function loadPlayerParams(playerKey = user1is) {
-                const player = partie.adn[playerKey];
-                if (!player || typeof player !== 'object') return;
+                //charger les paramètres de user1is
+                const player = partie.adn.players[playerKey];
+                if (!player) {
+                    playerParams.style.display = 'none';
+                    return;
+                }
+                playerParams.style.display = 'block';
+                document.getElementById('params-title').textContent = `Mes paramètres`;
 
+                /*                const player = partie.adn.players[0];
+                if (!player || typeof player !== 'object') return;
+*/
                 paramName.value = player.nom;
                 paramRole.value = player.role;
                 paramPerso.value = player.perso;
                 paramType.value = player.type;
                 paramScene.value = player.scene;
                 paramVivant.checked = player.vivant;
+                console.log("adn= ", partie.adn, " player= ", player);
             }
+            // Sauvegarder les params
+            saveParams.addEventListener('click', () => {
+                const player = partie.adn.players[user1is];
+                player.nom = paramName.value;
+                player.perso = paramPerso.value;
+                player.type = paramType.value;
+                player.scene = paramScene.value;
+                player.vivant = paramVivant.checked;
+                // Mise à jour des boutons si nom change
+                /*const btnEl = document.getElementById(`btn-${ViewedPlayer.toLowerCase()}`);
+                if (btnEl) btnEl.textContent = `Joueur ${ViewedPlayer.replace('J', '')} (#${player.nom})`;
+*/
+                // Enregistrer modification dans l'historique et mettre à jour l'UI
+                partie.history.push({
+                    sender: 'System',
+                    message: `✏️ ${partie.adn[user1is]?.nom ?? user1is} a modifié ses paramètres.`,
+                    target: null
+                });
+                updateCardPlayer();
+                //showMessages();
+            });
         </script>
     </div>
+    <style>
+        #main {
+            margin-left: 340px;
+            padding: 20px;
+        }
 
+        @media (max-width: 600px) {
+            #main {
+                margin-left: 0;
+                margin-top: 210px;
+                padding: 10px;
+            }
+        }
+    </style>
     <div id="main">
         <h1>Tralala - Jeu Garou Mortel</h1>
         <div id="game-banner">
@@ -381,7 +570,7 @@
                     updateCardPlayer(); showMessages();
                     updateSalle(); // Ajouté pour rafraîchir les dots après modification ADN
                 } catch (e) {
-                    alert("ADN invalide (JSON incorrect)");
+                    //  alert("ADN invalide (JSON incorrect)");
                 }
             }
         </script>
@@ -433,7 +622,7 @@
             //   showMessages();
             loadPlayerParams();
             // updateCardPlayerButtons();
-            //updateCardPlayer();
+            updateCardPlayer();
             //applyPermissions();
             //updateRoomInfo();
             //updateSalle(); // Ajouté pour générer les dots au démarrage
