@@ -139,8 +139,8 @@
             sallePublic: "",
             players: {
                 J1: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "Humain" },
-                J2: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "Gpt" },
-                J3: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "Gpt" }
+                J2: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "gpt" },
+                J3: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "gpt" }
             },
             currentSalle: "sallePublic",
             buzzActive: false
@@ -225,8 +225,8 @@
                  });
               players: {
                  J1: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "Humain" },
-                 J2: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "Gpt" },
-                 J3: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "Gpt" }
+                 J2: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "gpt" },
+                 J3: { sallePerso: "", scene: "", nom: "", role: "", perso: "", vivant: true, type: "gpt" }
              }*/
             });
 
@@ -363,7 +363,7 @@
       <p>
         <strong>J${i + 1} – ${v.nom}</strong><br>
         ${v.perso}<br>
-        ${v.type === 'Gpt' ? '🤖 IA' : '🧑 Humain'}<br>
+        ${v.type === 'gpt' ? '🤖 IA' : '🧑 Humain'}<br>
         ${v.vivant ? '🫀 Vivant' : '☠️ Mort'}
       </p>
     `)
@@ -436,7 +436,7 @@
             <label>Type:
                 <select id="param-type">
                     <option value="Humain">Humain</option>
-                    <option value="Gpt">Gpt</option>
+                    <option value="gpt">Gpt</option>
                 </select>
             </label>
             <label>Scène: <input type="text" id="param-scene"></label>
@@ -597,6 +597,19 @@
         <button id="save-partie">💾 Sauvegarder la partie</button>
     </footer>
     <script>
+                /////////////////Sauvegarder////////////////////////
+        document.getElementById('save-partie').addEventListener('click', () => {console.log("SAVE");
+            const data = JSON.stringify(partie, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'partie.json';
+            a.click();
+
+            URL.revokeObjectURL(url);
+        });
         // Objet Partie contenant ADN et historique
         let partie = {
             adn: {
