@@ -232,26 +232,53 @@
 
             startNewGame(players);
         });
-        function startNewGame(players) {
+        async function startNewGame(players) {
             const exAdn = partie.adn;
-            // 🔴 PLUS TARD : GPT génère l’ADN ici
-            // 🔴 PLUS TARD : recherche / création de partie Supabase ici
-            // Pour l’instant : ADN simple
-            console.log("players= ", players);
-            startAdn.players = players; // Config pour buildMinimalAdn
+
+            const promptSystem = `ancien1adn: { lieu: "Émission TV", sallePublic: "Pupitre du plateau", players: { J1: {sallePerso: 2, scene: "Epreuve de jeu", nom: "Matt", role: "Justicier", perso: "Animateur TV", vivant: true, type: "Humain" }, J2: { sallePerso: 3, scene: "Les loges", nom: "Robert", role: "Innocent", perso: "Candidat", vivant: true, type: "gpt" }, J3: { sallePerso: 1, scene: "Les coulisses", nom: "Michel", role: "Meurtrier", perso: "Producteur", vivant: true, type: "gpt" } }, currentSalle: "sallePublic", buzzActive: false } et ancien2adn: { lieu: "Le mariage de ma soeur", sallePublic: "Salle de repas", players: { J1: { sallePerso: 3, scene: "Piste de danse", nom: "Joey", role: "Justicier", perso: "Le marié", vivant: true, type: "Humain" }, J2: { sallePerso: 1, scene: "Préparation de la mariée ", nom: "Lola", role: "Innocent", perso: "La mariée", vivant: true, type: "gpt" }, J3: { sallePerso: 2, scene: "Banc de l église", nom: "Aston", role: "Meurtrier", perso: "Le frère", vivant: true, type: "gpt" } }, currentSalle: "sallePublic", buzzActive: false } // Redonne un nouvel ADN en t'aidant des 2 anciens, nouveau scénario, en JSON.`;
+
+            // Config minimal ADN pour buildMinimalAdn
+            startAdn.players = players;
             partie.adn = buildMinimalAdn(startAdn);
-            partie.history = []; // Reset history pour nouvelle partie
-            //push partie 
-            console.log("partie = ", partie, " exAdn= ", exAdn);
+            console.log("adn= ", partie.adn/*, " player= ", player*/, " players= ", players, " startAdn= ", startAdn);
+
+            // 🔹 Appel Edge Function pour générer le nouvel ADN
+            try {
+                const response = await fetch('https://cpktnkjahurhvhabwnsf.supabase.co/functions/v1/openai-completion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        promptSystem: promptSystem,
+                        promptUser: partie.adn
+                    })
+                });
+
+                if (!response.ok) throw new Error(`Erreur Edge Function: ${response.status}`);
+
+                const data = await response.json();
+
+                // Mettre à jour partie.adn avec le nouvel ADN renvoyé
+                partie.adn = JSON.parse(data.text);
+
+                // Reset de l'historique
+                partie.history = [];
+
+                console.log('Nouvelle partie démarrée avec ADN :', partie);
+
+            } catch (err) {
+                console.error('Erreur lors de l’appel Edge Function:', err);
+                // fallback : garder l'ancien ADN
+                partie.adn = exAdn;
+            }
 
             // Joueur local = premier humain
             const human = players.find(p => p.type === 'Humain');
             user1is = human?.key || 'J1';
 
             closeNewPartieModal(); // Fermer modal au lieu de start-overlay
-
-            init(); // ton init existant
+            init(); // Ton init existant
         }
+
         function buildMinimalAdn(startAdn) {
             const j1 = startAdn.players.find(p => p.key === 'J1') || {};
             const j2 = startAdn.players.find(p => p.key === 'J2') || {};
@@ -471,7 +498,6 @@
                 paramType.value = player.type;
                 paramScene.value = player.scene;
                 paramVivant.checked = player.vivant;
-                console.log("adn= ", partie.adn, " player= ", player);
             }
             // Sauvegarder les params
             saveParams.addEventListener('click', () => {
@@ -597,8 +623,9 @@
         <button id="save-partie">💾 Sauvegarder la partie</button>
     </footer>
     <script>
-                /////////////////Sauvegarder////////////////////////
-        document.getElementById('save-partie').addEventListener('click', () => {console.log("SAVE");
+        /////////////////Sauvegarder////////////////////////
+        document.getElementById('save-partie').addEventListener('click', () => {
+            console.log("SAVE");
             const data = JSON.stringify(partie, null, 2);
             const blob = new Blob([data], { type: 'application/json' });
             const url = URL.createObjectURL(blob);

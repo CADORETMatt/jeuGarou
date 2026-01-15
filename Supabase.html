@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // startNewGame transformée en async
+        async function startNewGame(partie, promptSystem) {
+            try {
+                // 1️⃣ Préparer le promptUser depuis partie.adn
+                const promptUser = partie.adn;
+
+                // 2️⃣ Appeler l'Edge Function
+                const response = await fetch('https://cpktnkjahurhvhabwnsf.supabase.co/functions/v1/openai-completion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        promptSystem: promptSystem,
+                        promptUser: promptUser
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur Edge Function: ${response.status}`);
+                }
+
+                // 3️⃣ Récupérer le JSON renvoyé par l'Edge Function
+                const data = await response.json();
+
+                // 4️⃣ Mettre à jour partie.adn avec le nouvel ADN
+                partie.adn = JSON.parse(data.text); // ⚠️ s'assurer que la réponse est du JSON valide
+
+                // 5️⃣ Reset de l'historique
+                partie.history = [];
+
+                console.log('Nouvelle partie démarrée avec ADN :', partie.adn);
+                return partie.adn;
+            } catch (err) {
+                console.error('Erreur startNewGame:', err);
+                return null;
+            }
+        }
+
+        // Exemple d'appel
+        const partie = {
+            adn: '{"lieu":"Salle de jeu", "players":{...}}',
+            history: []
+        };
+
+        const systemMsg = "Tu es un assistant qui génère un nouvel ADN à partir de deux anciens, en JSON.";
+
+        startNewGame(partie, systemMsg).then(nouvelAdn => {
+            // Faire ce que tu veux avec le nouvel ADN
+            console.log('ADN après démarrage:', nouvelAdn);
+        });
+
+    </script>
+</body>
+
+</html>
