@@ -1,65 +1,56 @@
+</html>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="UTF-8" />
+    <title>Supabase Edge Debug</title>
 </head>
 
 <body>
+
+    <h1>Edge Function Debug</h1>
+
+    <button id="send">Envoyer</button>
+
+    <pre id="result">En attente…</pre>
+
     <script>
-        // startNewGame transformée en async
-        async function startNewGame(partie, promptSystem) {
+        const result = document.getElementById("result");
+
+        console.log("🟢 Page loaded");
+
+        document.getElementById("send").addEventListener("click", async () => {
+            console.log("🟡 Button clicked");
+
             try {
-                // 1️⃣ Préparer le promptUser depuis partie.adn
-                const promptUser = partie.adn;
+                const response = await fetch(
+                    "https://cpktnkjahurhvhabwnsf.supabase.co/functions/v1/hello-world",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            message: "Hello ?"
+                        })
+                    }
+                );
 
-                // 2️⃣ Appeler l'Edge Function
-                const response = await fetch('https://cpktnkjahurhvhabwnsf.supabase.co/functions/v1/openai-completion', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        promptSystem: promptSystem,
-                        promptUser: promptUser
-                    })
-                });
+                console.log("🟢 HTTP status:", response.status);
 
-                if (!response.ok) {
-                    throw new Error(`Erreur Edge Function: ${response.status}`);
-                }
+                const text = await response.text();
+                console.log("📥 Response text:", text);
 
-                // 3️⃣ Récupérer le JSON renvoyé par l'Edge Function
-                const data = await response.json();
-
-                // 4️⃣ Mettre à jour partie.adn avec le nouvel ADN
-                partie.adn = JSON.parse(data.text); // ⚠️ s'assurer que la réponse est du JSON valide
-
-                // 5️⃣ Reset de l'historique
-                partie.history = [];
-
-                console.log('Nouvelle partie démarrée avec ADN :', partie.adn);
-                return partie.adn;
+                result.textContent = text;
             } catch (err) {
-                console.error('Erreur startNewGame:', err);
-                return null;
+                console.error("❌ Fetch error:", err);
+                result.textContent = err.message;
             }
-        }
-
-        // Exemple d'appel
-        const partie = {
-            adn: '{"lieu":"Salle de jeu", "players":{...}}',
-            history: []
-        };
-
-        const systemMsg = "Tu es un assistant qui génère un nouvel ADN à partir de deux anciens, en JSON.";
-
-        startNewGame(partie, systemMsg).then(nouvelAdn => {
-            // Faire ce que tu veux avec le nouvel ADN
-            console.log('ADN après démarrage:', nouvelAdn);
         });
-
     </script>
+
 </body>
 
 </html>
