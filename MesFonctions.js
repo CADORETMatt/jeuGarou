@@ -1,6 +1,6 @@
 //////Créer Serveur////////////////
 // app.js - Node.js Hello World using CommonJS
-
+//open : node app.js
 // Import the built-in 'http' module
 const http = require('http');
 
