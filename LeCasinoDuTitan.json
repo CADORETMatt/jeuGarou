@@ -1,0 +1,41 @@
+Je vais créer un nouvel ADN à partir des anciens scénarios.
+
+```json
+{
+    "lieu": "Croisière de luxe",
+    "sallePublic": "Pont principal",
+    "players": {
+        "J1": {
+            "sallePerso": 2,
+            "scene": "Casino du bateau",
+            "nom": "Sophia",
+            "role": "Justicier",
+            "perso": "Capitaine du navire",
+            "vivant": true,
+            "type": "Humain"
+        },
+        "J2": {
+            "sallePerso": 3,
+            "scene": "Cabines de luxe",
+            "nom": "Peter",
+            "role": "Innocent",
+            "perso": "Passager",
+            "vivant": true,
+            "type": "gpt"
+        },
+        "J3": {
+            "sallePerso": 1,
+            "scene": "Salle des machines",
+            "nom": "Clara",
+            "role": "Meurtrier",
+            "perso": "Mécanicienne",
+            "vivant": true,
+            "type": "gpt"
+        }
+    },
+    "currentSalle": "sallePublic",
+    "buzzActive": false
+}
+```
+
+Ce scénario place les personnages sur une croisière, avec des rôles similaires mais un nouvel environnement.

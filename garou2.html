@@ -235,7 +235,20 @@
         async function startNewGame(players) {
             const exAdn = partie.adn;
 
-            const promptSystem = `ancien1adn: { lieu: "Émission TV", sallePublic: "Pupitre du plateau", players: { J1: {sallePerso: 2, scene: "Epreuve de jeu", nom: "Matt", role: "Justicier", perso: "Animateur TV", vivant: true, type: "Humain" }, J2: { sallePerso: 3, scene: "Les loges", nom: "Robert", role: "Innocent", perso: "Candidat", vivant: true, type: "gpt" }, J3: { sallePerso: 1, scene: "Les coulisses", nom: "Michel", role: "Meurtrier", perso: "Producteur", vivant: true, type: "gpt" } }, currentSalle: "sallePublic", buzzActive: false } et ancien2adn: { lieu: "Le mariage de ma soeur", sallePublic: "Salle de repas", players: { J1: { sallePerso: 3, scene: "Piste de danse", nom: "Joey", role: "Justicier", perso: "Le marié", vivant: true, type: "Humain" }, J2: { sallePerso: 1, scene: "Préparation de la mariée ", nom: "Lola", role: "Innocent", perso: "La mariée", vivant: true, type: "gpt" }, J3: { sallePerso: 2, scene: "Banc de l église", nom: "Aston", role: "Meurtrier", perso: "Le frère", vivant: true, type: "gpt" } }, currentSalle: "sallePublic", buzzActive: false } // Redonne un nouvel ADN en t'aidant des 2 anciens, nouveau scénario, en JSON.`;
+            const promptSystem = `ancien1adn: { lieu: "Émission TV", sallePublic: "Pupitre du plateau", players: { J1: {sallePerso: 2, scene: "Epreuve de jeu", nom: "Matt", role: "Justicier", perso: "Animateur TV", vivant: true, type: "Humain" }, J2: { sallePerso: 3, scene: "Les loges", nom: "Robert", role: "Innocent", perso: "Candidat", vivant: true, type: "gpt" }, J3: { sallePerso: 1, scene: "Les coulisses", nom: "Michel", role: "Meurtrier", perso: "Producteur", vivant: true, type: "gpt" } }, currentSalle: "sallePublic", buzzActive: false } 
+et ancien2adn: { lieu: "Le mariage de ma soeur", sallePublic: "Salle de repas", players: { J1: { sallePerso: 3, scene: "Piste de danse", nom: "Joey", role: "Justicier", perso: "Le marié", vivant: true, type: "Humain" }, J2: { sallePerso: 1, scene: "Préparation de la mariée ", nom: "Lola", role: "Innocent", perso: "La mariée", vivant: true, type: "gpt" }, J3: { sallePerso: 2, scene: "Banc de l'église", nom: "Aston", role: "Meurtrier", perso: "Le frère", vivant: true, type: "gpt" } }, currentSalle: "sallePublic", buzzActive: false } 
+//sallePerso : 1, 2 ou 3 (index au hasard) - role: Meurtrier, Justicier et Innocent (3 pers.=3 roles) - vivant = true 
+Tu es le moteur du jeu Loup-Garou.
+Tu reçois un état de jeu en JSON.
+Tu dois renvoyer UNIQUEMENT le NOUVEL état du jeu.
+⚠️ Règles impératives :
+- Réponds uniquement avec du JSON valide
+- Aucun texte hors JSON
+- Même structure que l'entrée, en t'aidant des 2 anciens adn, mais nouveau scénario
+- La requête est le minimum des consignes demandé par l'utilisateur
+- Il doit être facile de prendre les scènes en photo et de bien les différencier 
+- Ne supprime aucune clé
+`;
 
             // Config minimal ADN pour buildMinimalAdn
             startAdn.players = players;
@@ -244,9 +257,9 @@
             //vers serveur node
             const dataToSend = {
                 promptSystem: promptSystem,
-                promptUser: partie.adn
+                promptUser: JSON.stringify(partie.adn, null, 2)
             };
-            console.log("dataSend: ", dataToSend, "Prompt : ", promptSystem, " Ask : ", partie.adn);
+            console.log("dataSend: ", dataToSend, "Prompt : ", promptSystem, " Ask : ", JSON.stringify(partie.adn, null, 2));
 
             try {
                 console.log("🚀 FETCH VA ÊTRE ENVOYÉ");
@@ -258,6 +271,14 @@
 
                 const result = await response.json();
                 console.log("Réponse serveur :", result);
+                const raw = result.answer;
+                ;
+
+                // si tu fais : res.json({ answer: response.output_text })
+                const cleanAdn = cleanAndParseGPTAnswer({ answer: raw });
+
+                partie.adn = cleanAdn;
+                console.log("Adn généré : ", partie.adn);
 
             } catch (err) {
                 console.error("Erreur fetch :", err);
@@ -339,6 +360,33 @@
                 currentSalle: "SallePublic",
                 buzzActive: false
             };
+        }
+        function cleanAndParseGPTAnswer(gptResponse) {
+            if (!gptResponse || typeof gptResponse.answer !== "string") {
+                throw new Error("Réponse GPT invalide (answer manquant)");
+            }
+
+            let text = gptResponse.answer.trim();
+
+            // 1️⃣ Supprimer les fences Markdown ```json ... ```
+            text = text
+                .replace(/^```json\s*/i, "")
+                .replace(/^```\s*/i, "")
+                .replace(/\s*```$/i, "");
+
+            // 2️⃣ Extraire le JSON (au cas où GPT ajoute du texte)
+            const match = text.match(/\{[\s\S]*\}/);
+            if (!match) {
+                throw new Error("Aucun JSON détecté dans la réponse GPT");
+            }
+
+            // 3️⃣ Parser le JSON
+            try {
+                return JSON.parse(match[0]);
+            } catch (e) {
+                console.error("JSON brut reçu :", match[0]);
+                throw new Error("JSON invalide retourné par GPT");
+            }
         }
     </script>
     <style>
