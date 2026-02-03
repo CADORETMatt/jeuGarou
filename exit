@@ -1,0 +1,95 @@
+[33mcommit 4d244cfaf81c7b8f7a5610b6657fa6afd915cfbe[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Sun Jan 18 17:52:54 2026 +0100
+
+    fetch ok
+
+[33mcommit 54224542a136b0688099f1c3bfa612c13c51ef0c[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Sat Jan 17 19:16:59 2026 +0100
+
+    backend et varEnv
+
+[33mcommit 10d4c31d4c5604b89fad5468635fb2e644f668e0[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Thu Jan 15 15:20:09 2026 +0100
+
+    fetch no
+
+[33mcommit 57827134d787cfb51b6fcd27668a270b50ab90e3[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Wed Jan 14 10:28:47 2026 +0100
+
+    gpt
+
+[33mcommit 5a918c59b8959d0f8a2b2c0a8fbe5161b6415d53[m
+Author: Matthias Cadoret <cadoret.matt@hotmail.com>
+Date:   Wed Jan 14 07:33:53 2026 +0100
+
+    save partie
+
+[33mcommit 649dcad6b83bd778d70fd7d178e8fb91a26e81f2[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Tue Jan 13 05:50:19 2026 +0100
+
+    cards
+
+[33mcommit c0ced2763bd271d063b2def3455ae4cc57c24ff4[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Mon Jan 12 07:19:58 2026 +0100
+
+    Refonte totale
+
+[33mcommit 6b18b3cd35f7fb871c524bbb896b76d679e33af2[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Sat Jan 10 05:08:16 2026 +0100
+
+    params presq
+
+[33mcommit 21eb86165d1e3bb13c6e6c7a5a61a00cf77bb7dc[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Fri Jan 9 09:34:46 2026 +0100
+
+    params en cours
+
+[33mcommit e8cea2776a49c716d26e94af9dc015abb470569a[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Thu Jan 8 22:34:19 2026 +0100
+
+    Salles ok
+
+[33mcommit 8875956b11fae9147ea26f798b7f629ccc89b870[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Thu Jan 8 12:48:10 2026 +0100
+
+    gérer json
+
+[33mcommit 5da46c30ccd6a819d4f65f3cd02a817c37618ab1[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Thu Jan 8 05:01:55 2026 +0100
+
+    apply adn
+
+[33mcommit c66b13d5c110e2135a076513681d3080af46f31a[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Wed Jan 7 04:06:35 2026 +0100
+
+    2 refonte
+
+[33mcommit 3a87619bc449a16cd8daa044ddc9e84f031e6a98[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Tue Jan 6 17:24:38 2026 +0100
+
+    synchro script, 1er débug
+
+[33mcommit fa4ac8ce0a4d297458b191aceadfbd0d6659fd5e[m
+Author: CADORET Matthias <cadoret.matt@hotmail.com>
+Date:   Tue Jan 6 08:35:56 2026 +0100
+
+    avant refonte
+
+[33mcommit eaf7de5a97f7044662a18fe72576a9642a1f1599[m
+Author: MattMarket <cadoret.matt@hotmail.com>
+Date:   Sun Jan 4 17:39:35 2026 +0100
+
+    Initial commit
